@@ -1,0 +1,12 @@
+{
+  "name": "careflow-hms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CareFlow — full-stack hospital management system (Phase 0 + Front Desk)",
+  "scripts": {
+    "setup": "cd server && npm install && cd ../client && npm install",
+    "seed": "cd server && npm run db:seed"
+  },
+  "author": "Ayinde Abdul Aziz <ayindeakanji.first@gmail.com>",
+  "license": "MIT"
+}

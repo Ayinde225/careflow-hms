@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.local
+.DS_Store
+
+# Secrets & local env
+.env
+.env.*.local
+
+# SQLite dev database
+server/prisma/dev.db
+server/prisma/dev.db-journal

@@ -1,0 +1,188 @@
+// CareFlow HMS — Phase 0 + Front Desk schema
+// SQLite for zero-setup local dev. Swap `provider` to "postgresql" for production.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --- Identity & access -------------------------------------------------
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String // admin | receptionist | doctor | nurse | pharmacist | lab_tech | billing | patient
+  fullName     String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  provider     Provider?
+  auditLogs    AuditLog[]
+  appointments Appointment[] @relation("createdBy")
+}
+
+// --- Patient & clinical record ----------------------------------------
+model Patient {
+  id                String   @id @default(cuid())
+  mrn               String   @unique
+  firstName         String
+  lastName          String
+  dob               DateTime
+  sex               String
+  phone             String?
+  email             String?
+  address           String?
+  preferredLanguage String   @default("English")
+  createdAt         DateTime @default(now())
+  insurance         InsurancePolicy[]
+  allergies         Allergy[]
+  medications       Medication[]
+  appointments      Appointment[]
+  encounters        Encounter[]
+  payments          Payment[]
+  consents          ConsentDocument[]
+}
+
+model InsurancePolicy {
+  id                 String   @id @default(cuid())
+  patientId          String
+  patient            Patient  @relation(fields: [patientId], references: [id])
+  payerName          String
+  memberId           String
+  groupNumber        String?
+  planType           String? // PPO | HMO | Medicare | Medicaid | Self-Pay
+  copayAmount        Float    @default(0)
+  effectiveDate      DateTime?
+  isPrimary          Boolean  @default(true)
+  verificationStatus String   @default("Unverified") // Unverified | Verified | Inactive
+}
+
+model Allergy {
+  id        String  @id @default(cuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+  substance String
+  reaction  String?
+  severity  String? // Mild | Moderate | Severe
+}
+
+model Medication {
+  id        String  @id @default(cuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+  name      String
+  dose      String?
+  frequency String?
+  isActive  Boolean @default(true)
+}
+
+// --- Scheduling --------------------------------------------------------
+model Department {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  providers Provider[]
+  appointments Appointment[]
+}
+
+model Provider {
+  id           String     @id @default(cuid())
+  userId       String?    @unique
+  user         User?      @relation(fields: [userId], references: [id])
+  fullName     String
+  specialty    String
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  availability ProviderAvailability[]
+  appointments Appointment[]
+}
+
+model ProviderAvailability {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id])
+  dayOfWeek   Int // 0 = Sunday ... 6 = Saturday
+  startTime   String // "08:00"
+  endTime     String // "16:00"
+  slotMinutes Int      @default(30)
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id])
+  providerId    String
+  provider      Provider @relation(fields: [providerId], references: [id])
+  departmentId  String
+  department    Department @relation(fields: [departmentId], references: [id])
+  startAt       DateTime
+  endAt         DateTime
+  reason        String?
+  status        String   @default("Scheduled") // Scheduled | CheckedIn | Roomed | Completed | Cancelled | NoShow
+  createdByUserId String?
+  createdBy     User?    @relation("createdBy", fields: [createdByUserId], references: [id])
+  createdAt     DateTime @default(now())
+  encounter     Encounter?
+}
+
+// --- Encounter (filled by later clinical phases) ----------------------
+model Encounter {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id])
+  type          String   @default("Office Visit")
+  status        String   @default("Open")
+  checkInAt     DateTime @default(now())
+  roomedAt      DateTime?
+  consents      ConsentDocument[]
+  questionnaire QuestionnaireResponse[]
+  payments      Payment[]
+}
+
+model ConsentDocument {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id])
+  encounterId  String?
+  encounter    Encounter? @relation(fields: [encounterId], references: [id])
+  type         String // HIPAA | Financial | TreatmentConsent
+  signedAt     DateTime @default(now())
+  signatureSvg String?
+}
+
+model QuestionnaireResponse {
+  id          String   @id @default(cuid())
+  encounterId String
+  encounter   Encounter @relation(fields: [encounterId], references: [id])
+  answers     String // JSON string
+  createdAt   DateTime @default(now())
+}
+
+// --- Money -------------------------------------------------------------
+model Payment {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  encounterId String?
+  encounter   Encounter? @relation(fields: [encounterId], references: [id])
+  amount      Float
+  type        String // Copay | Bill
+  method      String // Card | Cash
+  status      String   @default("Paid")
+  createdAt   DateTime @default(now())
+}
+
+// --- Compliance --------------------------------------------------------
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actor       User?    @relation(fields: [actorUserId], references: [id])
+  action      String
+  entityType  String
+  entityId    String?
+  at          DateTime @default(now())
+  metadata    String? // JSON string
+}
