@@ -4,10 +4,13 @@ import { requireAuth, requireRole } from "../auth.js";
 import { audit } from "../audit.js";
 
 export const clinicalRouter = Router();
-clinicalRouter.use(requireAuth);
 
 const CLINICIAN = ["doctor"];
 const CLINICAL_STAFF = ["doctor", "nurse"];
+
+// Whole clinical surface is staff-only — patients (and reception) are blocked here.
+clinicalRouter.use(requireAuth);
+clinicalRouter.use(requireRole(...CLINICAL_STAFF));
 
 // Clinician queue: today's checked-in / roomed encounters
 clinicalRouter.get("/queue", async (_req, res) => {

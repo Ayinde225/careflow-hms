@@ -19,6 +19,7 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   provider     Provider?
+  patient      Patient?
   auditLogs    AuditLog[]
   appointments Appointment[] @relation("createdBy")
 }
@@ -35,7 +36,10 @@ model Patient {
   email             String?
   address           String?
   preferredLanguage String   @default("English")
+  userId            String?  @unique
+  user              User?    @relation(fields: [userId], references: [id])
   createdAt         DateTime @default(now())
+  messages          Message[]
   insurance         InsurancePolicy[]
   allergies         Allergy[]
   medications       Medication[]
@@ -245,6 +249,17 @@ model Payment {
   method      String // Card | Cash
   status      String   @default("Paid")
   createdAt   DateTime @default(now())
+}
+
+// --- Phase 3: Patient portal messaging --------------------------------
+model Message {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  sender    String // Patient | CareTeam
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 // --- Compliance --------------------------------------------------------

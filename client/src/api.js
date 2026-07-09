@@ -50,6 +50,17 @@ export const api = {
   resultOrder: (id, body) => request(`/clinical/orders/${id}/result`, { method: "PATCH", body }),
   addPrescription: (id, body) => request(`/clinical/encounters/${id}/prescriptions`, { method: "POST", body }),
   completeEncounter: (id) => request(`/clinical/encounters/${id}/complete`, { method: "POST" }),
+
+  // --- Phase 3: Patient portal (scoped to the logged-in patient) ---
+  portalMe: () => request("/portal/me"),
+  portalAppointments: () => request("/portal/appointments"),
+  portalCancel: (id) => request(`/portal/appointments/${id}/cancel`, { method: "POST" }),
+  portalResults: () => request("/portal/results"),
+  portalPrescriptions: () => request("/portal/prescriptions"),
+  portalVisits: () => request("/portal/visits"),
+  portalBilling: () => request("/portal/billing"),
+  portalMessages: () => request("/portal/messages"),
+  portalSendMessage: (body) => request("/portal/messages", { method: "POST", body: { body } }),
 };
 
 // Local calendar date (YYYY-MM-DD) — NOT UTC, so "today" matches the server's local-time day bounds.

@@ -1,6 +1,6 @@
 # CareFlow — Hospital Management System
 
-A full-stack hospital management system that digitalizes the running of a hospital, built **module by module along one patient's journey**. Phase 0 (foundation), the **Front Desk / Reception** seat, and the **Clinician** seat are complete and working end to end.
+A full-stack hospital management system that digitalizes the running of a hospital, built **module by module along one patient's journey**. Three seats are complete and working end to end: **Front Desk / Reception**, **Clinician**, and the **Patient Portal** — plus the Phase 0 foundation.
 
 Realism is anchored on **Conway Regional Health System**, which runs on **Epic / MyChart** — so CareFlow mirrors real workflows: **MRN**-based patient records, **eCheck-In**, appointment scheduling, a live reception queue, and **PatientWallet**-style copay collection.
 
@@ -27,6 +27,16 @@ Realism is anchored on **Conway Regional Health System**, which runs on **Epic /
 - 🧪 **Orders** — labs & imaging, with mock resulting
 - 💊 **e-Prescribing** — medication, dose, frequency, quantity, refills
 - ✅ **Complete visit** → closes the encounter, marks the appointment done
+
+### Patient Portal (Phase 3, MyChart-style)
+
+Patients log into their own secure view — **scoped so each patient sees only their own records**:
+- 🏠 **Home** — upcoming appointments, latest care-team message, quick stats
+- 🧬 **My Health** — allergies, current medications, insurance
+- 🧪 **Results** — released lab & imaging results with values
+- 📄 **Visits** — history with an expandable **After Visit Summary** (diagnoses, plan, tests, prescriptions)
+- 💬 **Secure messaging** with the care team
+- 💳 **Billing** (PatientWallet-style) — balance & payment history
 
 ## 🧱 Tech stack
 
@@ -65,11 +75,12 @@ npm run dev            # http://localhost:5173
 | Receptionist | `reception@careflow.dev` | `reception123` |
 | Admin | `admin@careflow.dev` | `admin123` |
 | Doctor | `dr.hart@careflow.dev` | `doctor123` |
+| Patient (portal) | `jordan@careflow.dev` | `patient123` |
 
 ## 🗺️ Roadmap (the patient journey continues)
 
 - ✅ **Phase 2 — Clinician:** EHR notes, ICD-10 diagnoses, lab/imaging orders, e-prescribing *(done)*
-- **Phase 3 — Patient portal (MyChart-style):** results, messaging, After Visit Summary
+- ✅ **Phase 3 — Patient portal (MyChart-style):** results, After Visit Summary, messaging, billing *(done)*
 - **Phase 4 — Pharmacy & inventory**
 - **Phase 5 — Billing & insurance claims + revenue analytics**
 - **Phase 6 — Admin analytics, bed & OR management, full audit**

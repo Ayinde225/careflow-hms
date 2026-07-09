@@ -14,6 +14,12 @@ async function main() {
 
   // Clean (order matters for FKs)
   await prisma.auditLog.deleteMany();
+  await prisma.message.deleteMany();
+  await prisma.prescription.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.diagnosis.deleteMany();
+  await prisma.clinicalNote.deleteMany();
+  await prisma.vitals.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.questionnaireResponse.deleteMany();
   await prisma.consentDocument.deleteMany();
@@ -40,6 +46,11 @@ async function main() {
   const drUser = await prisma.user.create({
     data: { email: "dr.hart@careflow.dev", passwordHash: hash("doctor123"), role: "doctor", fullName: "Dr. Alicia Hart" },
   });
+
+  // Patient portal accounts (linked to patient records below)
+  const uJordan = await prisma.user.create({ data: { email: "jordan@careflow.dev", passwordHash: hash("patient123"), role: "patient", fullName: "Jordan Miles" } });
+  const uPriya = await prisma.user.create({ data: { email: "priya@careflow.dev", passwordHash: hash("patient123"), role: "patient", fullName: "Priya Nair" } });
+  const uSam = await prisma.user.create({ data: { email: "sam@careflow.dev", passwordHash: hash("patient123"), role: "patient", fullName: "Sam Carter" } });
 
   // --- Departments & providers ---
   const familyMed = await prisma.department.create({ data: { name: "Family Medicine" } });
@@ -68,6 +79,7 @@ async function main() {
   const jordan = await prisma.patient.create({
     data: {
       mrn: mk(1), firstName: "Jordan", lastName: "Miles", dob: new Date("1990-04-12"), sex: "Male",
+      userId: uJordan.id,
       phone: "501-555-0142", email: "jordan.miles@example.com", address: "22 Oak St, Conway, AR",
       insurance: { create: { payerName: "Blue Cross Blue Shield", memberId: "BCBS884210", groupNumber: "GRP-102", planType: "PPO", copayAmount: 30, isPrimary: true, verificationStatus: "Verified" } },
       allergies: { create: [{ substance: "Penicillin", reaction: "Hives", severity: "Moderate" }] },
@@ -77,6 +89,7 @@ async function main() {
   const priya = await prisma.patient.create({
     data: {
       mrn: mk(2), firstName: "Priya", lastName: "Nair", dob: new Date("1985-11-03"), sex: "Female",
+      userId: uPriya.id,
       phone: "501-555-0177", email: "priya.nair@example.com", address: "8 Elm Ave, Conway, AR",
       insurance: { create: { payerName: "Aetna", memberId: "AET551903", planType: "HMO", copayAmount: 25, isPrimary: true, verificationStatus: "Unverified" } },
     },
@@ -84,6 +97,7 @@ async function main() {
   const sam = await prisma.patient.create({
     data: {
       mrn: mk(3), firstName: "Sam", lastName: "Carter", dob: new Date("2015-06-21"), sex: "Male",
+      userId: uSam.id,
       phone: "501-555-0199", address: "14 Pine Rd, Conway, AR",
       insurance: { create: { payerName: "UnitedHealthcare", memberId: "UHC220145", planType: "PPO", copayAmount: 20, isPrimary: true, verificationStatus: "Verified" } },
     },
@@ -100,10 +114,32 @@ async function main() {
     data: { patientId: sam.id, providerId: providers[2].id, departmentId: pediatrics.id, startAt: at(13, 0), endAt: at(13, 30), reason: "Well-child visit", status: "Scheduled", createdByUserId: reception.id },
   });
 
+  // --- A completed past visit for Jordan (populates his patient portal) ---
+  const pastDay = new Date(); pastDay.setDate(pastDay.getDate() - 14); pastDay.setHours(10, 0, 0, 0);
+  const pastAppt = await prisma.appointment.create({
+    data: {
+      patientId: jordan.id, providerId: providers[0].id, departmentId: familyMed.id,
+      startAt: pastDay, endAt: new Date(pastDay.getTime() + 30 * 60000),
+      reason: "Follow-up: blood pressure", status: "Completed", createdByUserId: reception.id,
+    },
+  });
+  const pastEnc = await prisma.encounter.create({
+    data: { appointmentId: pastAppt.id, patientId: jordan.id, type: "Office Visit", status: "Closed", checkInAt: pastDay },
+  });
+  await prisma.vitals.create({ data: { encounterId: pastEnc.id, systolic: 138, diastolic: 88, heartRate: 76, temperatureF: 98.4, respiratoryRate: 15, weightKg: 82, recordedByUserId: drUser.id } });
+  await prisma.clinicalNote.create({ data: { encounterId: pastEnc.id, subjective: "Follow-up for elevated blood pressure. Feeling well.", objective: "BP mildly elevated at 138/88.", assessment: "Hypertension, controlled with lifestyle.", plan: "Continue Lisinopril. Recheck lipids. Follow up in 3 months.", authorUserId: drUser.id } });
+  await prisma.diagnosis.create({ data: { encounterId: pastEnc.id, icd10Code: "I10", description: "Essential (primary) hypertension", isPrimary: true } });
+  await prisma.order.create({ data: { encounterId: pastEnc.id, type: "Lab", name: "Lipid Panel", status: "Resulted", resultText: "Total cholesterol 195 mg/dL, LDL 118 (borderline), HDL 52, Triglycerides 140.", orderedByUserId: drUser.id } });
+  await prisma.order.create({ data: { encounterId: pastEnc.id, type: "Lab", name: "Basic Metabolic Panel (BMP)", status: "Resulted", resultText: "All values within normal limits.", orderedByUserId: drUser.id } });
+  await prisma.prescription.create({ data: { encounterId: pastEnc.id, patientId: jordan.id, drugName: "Lisinopril", dose: "10 mg", frequency: "Daily", quantity: 90, refills: 3, instructions: "Take one tablet by mouth daily.", prescribedByUserId: drUser.id } });
+  await prisma.payment.create({ data: { patientId: jordan.id, encounterId: pastEnc.id, amount: 30, type: "Copay", method: "Card", status: "Paid", createdAt: pastDay } });
+  await prisma.message.create({ data: { patientId: jordan.id, sender: "CareTeam", body: "Hi Jordan, your recent lab results are available in your portal. Your LDL is slightly elevated — let's discuss diet at your next visit. — Dr. Hart's office" } });
+
   console.log("Done. Demo logins:");
   console.log("  admin@careflow.dev / admin123");
   console.log("  reception@careflow.dev / reception123");
   console.log("  dr.hart@careflow.dev / doctor123");
+  console.log("  jordan@careflow.dev / patient123  (patient portal)");
 }
 
 main()
