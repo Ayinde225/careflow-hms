@@ -5,6 +5,8 @@ import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Patients from "./pages/Patients.jsx";
 import Schedule from "./pages/Schedule.jsx";
+import ClinicalQueue from "./pages/ClinicalQueue.jsx";
+import Encounter from "./pages/Encounter.jsx";
 
 function Protected({ children }) {
   const { user } = useAuth();
@@ -19,6 +21,8 @@ export default function App() {
       <Route path="/" element={<Protected><Dashboard /></Protected>} />
       <Route path="/patients" element={<Protected><Patients /></Protected>} />
       <Route path="/schedule" element={<Protected><Schedule /></Protected>} />
+      <Route path="/clinical" element={<Protected><ClinicalQueue /></Protected>} />
+      <Route path="/clinical/:id" element={<Protected><Encounter /></Protected>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

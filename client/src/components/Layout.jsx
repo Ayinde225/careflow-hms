@@ -21,6 +21,7 @@ export default function Layout({ children }) {
           <NavLink to="/" end>🗓️ Dashboard</NavLink>
           <NavLink to="/patients">👤 Patients</NavLink>
           <NavLink to="/schedule">➕ Schedule</NavLink>
+          <NavLink to="/clinical">🩺 Clinical</NavLink>
         </nav>
         <div className="sidebar-foot">
           <div className="who">

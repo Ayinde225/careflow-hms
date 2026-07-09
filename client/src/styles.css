@@ -117,6 +117,32 @@ input:focus, select:focus { outline: 2px solid #99f6e4; border-color: var(--bran
 .chip { flex: 1; padding: 7px; border: 1px solid var(--line); border-radius: 8px; background: #f8fafc; cursor: pointer; font-size: .8rem; font-weight: 600; color: #475569; }
 .chip:hover { background: #f1f5f9; }
 
+/* --- Phase 2: clinical chart --- */
+.banner { display: flex; justify-content: space-between; align-items: flex-start; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 22px; margin: 10px 0 18px; }
+.banner h1 { font-size: 1.35rem; }
+.banner-meta { color: var(--muted); font-size: .88rem; margin-top: 4px; }
+.banner-flags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 320px; }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.pad { padding: 16px 18px; }
+.pad label { margin-bottom: 10px; }
+.pad textarea { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: .9rem; resize: vertical; }
+.pad textarea:focus { outline: 2px solid #99f6e4; border-color: var(--brand); }
+.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mini-action { grid-column: 1 / -1; }
+.vital-strip { display: flex; gap: 18px; flex-wrap: wrap; padding: 4px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.vital-strip div { display: flex; flex-direction: column; }
+.vital-strip b { font-size: 1.2rem; color: var(--brand-dark); }
+.vital-strip span { font-size: .72rem; color: var(--muted); text-transform: uppercase; }
+.saved-note { background: #f8fafc; border-radius: 9px; padding: 10px 14px; margin-bottom: 12px; font-size: .9rem; }
+.saved-note p { margin: 4px 0; }
+.list-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.list-row:last-of-type { border-bottom: none; }
+.add-row { display: flex; gap: 8px; margin-top: 12px; }
+.add-row select { flex: 1; }
+.linkbtn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: .82rem; font-weight: 600; }
+.complete-bar { display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin-top: 18px; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+
+@media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) {
   .kpi-row { grid-template-columns: 1fr 1fr; }
   .grid2 { grid-template-columns: 1fr; }

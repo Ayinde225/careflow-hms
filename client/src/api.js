@@ -38,6 +38,18 @@ export const api = {
   slots: (providerId, date) => request(`/scheduling/providers/${providerId}/slots?date=${date}`),
   pay: (body) => request("/payments", { method: "POST", body }),
   paymentSummary: () => request("/payments/today-summary"),
+
+  // --- Phase 2: Clinical ---
+  clinicalQueue: () => request("/clinical/queue"),
+  encounter: (id) => request(`/clinical/encounters/${id}`),
+  addVitals: (id, body) => request(`/clinical/encounters/${id}/vitals`, { method: "POST", body }),
+  addNote: (id, body) => request(`/clinical/encounters/${id}/note`, { method: "POST", body }),
+  addDiagnosis: (id, body) => request(`/clinical/encounters/${id}/diagnoses`, { method: "POST", body }),
+  removeDiagnosis: (id) => request(`/clinical/diagnoses/${id}`, { method: "DELETE" }),
+  addOrder: (id, body) => request(`/clinical/encounters/${id}/orders`, { method: "POST", body }),
+  resultOrder: (id, body) => request(`/clinical/orders/${id}/result`, { method: "PATCH", body }),
+  addPrescription: (id, body) => request(`/clinical/encounters/${id}/prescriptions`, { method: "POST", body }),
+  completeEncounter: (id) => request(`/clinical/encounters/${id}/complete`, { method: "POST" }),
 };
 
 // Local calendar date (YYYY-MM-DD) — NOT UTC, so "today" matches the server's local-time day bounds.

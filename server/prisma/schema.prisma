@@ -43,6 +43,7 @@ model Patient {
   encounters        Encounter[]
   payments          Payment[]
   consents          ConsentDocument[]
+  prescriptions     Prescription[]
 }
 
 model InsurancePolicy {
@@ -140,6 +141,77 @@ model Encounter {
   consents      ConsentDocument[]
   questionnaire QuestionnaireResponse[]
   payments      Payment[]
+  vitals        Vitals[]
+  notes         ClinicalNote[]
+  diagnoses     Diagnosis[]
+  orders        Order[]
+  prescriptions Prescription[]
+}
+
+// --- Phase 2: Clinical ------------------------------------------------
+model Vitals {
+  id              String   @id @default(cuid())
+  encounterId     String
+  encounter       Encounter @relation(fields: [encounterId], references: [id])
+  systolic        Int?
+  diastolic       Int?
+  heartRate       Int?
+  temperatureF    Float?
+  respiratoryRate Int?
+  weightKg        Float?
+  heightCm        Float?
+  recordedByUserId String?
+  recordedAt      DateTime @default(now())
+}
+
+model ClinicalNote {
+  id           String   @id @default(cuid())
+  encounterId  String
+  encounter    Encounter @relation(fields: [encounterId], references: [id])
+  subjective   String?
+  objective    String?
+  assessment   String?
+  plan         String?
+  authorUserId String?
+  createdAt    DateTime @default(now())
+}
+
+model Diagnosis {
+  id          String   @id @default(cuid())
+  encounterId String
+  encounter   Encounter @relation(fields: [encounterId], references: [id])
+  icd10Code   String
+  description String
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  encounterId   String
+  encounter     Encounter @relation(fields: [encounterId], references: [id])
+  type          String // Lab | Imaging
+  name          String
+  status        String   @default("Ordered") // Ordered | Resulted
+  resultText    String?
+  orderedByUserId String?
+  createdAt     DateTime @default(now())
+}
+
+model Prescription {
+  id               String   @id @default(cuid())
+  encounterId      String
+  encounter        Encounter @relation(fields: [encounterId], references: [id])
+  patientId        String
+  patient          Patient  @relation(fields: [patientId], references: [id])
+  drugName         String
+  dose             String?
+  frequency        String?
+  quantity         Int?
+  refills          Int      @default(0)
+  instructions     String?
+  prescribedByUserId String?
+  createdAt        DateTime @default(now())
 }
 
 model ConsentDocument {
