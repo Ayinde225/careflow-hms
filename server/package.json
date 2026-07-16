@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "CareFlow HMS API — Express + Prisma (Phase 0 + Front Desk)",
+  "description": "CareFlow HMS API — Express + Prisma",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",

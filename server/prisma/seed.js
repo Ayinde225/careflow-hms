@@ -10,6 +10,16 @@ function at(hour, min = 0) {
 }
 
 async function main() {
+  // On a deployed instance we only want to seed the first time, so redeploys
+  // don't wipe data. Local dev is unaffected (it doesn't set this flag).
+  if (process.env.SKIP_SEED_IF_PRESENT === "1") {
+    const existing = await prisma.user.count().catch(() => 0);
+    if (existing > 0) {
+      console.log(`Seed skipped — ${existing} users already present.`);
+      return;
+    }
+  }
+
   console.log("Seeding CareFlow demo data...");
 
   // Clean (order matters for FKs)

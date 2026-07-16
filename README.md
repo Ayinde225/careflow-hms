@@ -88,6 +88,13 @@ npm run dev            # http://localhost:5173
 | Patient (portal) | `jordan@careflow.dev` | `patient123` |
 | Billing / revenue | `billing@careflow.dev` | `billing123` |
 
+## 🚀 Deploy
+
+The repo ships a one-click **[Render blueprint](render.yaml)** that provisions the database,
+API, and client together. See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the full runbook
+(Render all-in-one, or Neon + Render + Vercel). Local dev stays on SQLite; the build swaps
+Prisma to PostgreSQL for the cloud automatically.
+
 ## 🗺️ Roadmap (the patient journey continues)
 
 - ✅ **Phase 2 — Clinician:** EHR notes, ICD-10 diagnoses, lab/imaging orders, e-prescribing *(done)*
