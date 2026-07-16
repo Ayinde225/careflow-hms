@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../auth.js";
 import { audit } from "../audit.js";
+import { round2, summarizeInvoice } from "../lib/invoiceMath.js";
 
 export const portalRouter = Router();
 portalRouter.use(requireAuth);
@@ -92,14 +93,37 @@ portalRouter.get("/visits/:id", async (req, res) => {
   res.json(visit);
 });
 
-// Billing — payment history
+// Billing — real balances from the patient's invoices, using the same money
+// logic the billing office uses, so the two can never tell different stories.
 portalRouter.get("/billing", async (req, res) => {
-  const payments = await prisma.payment.findMany({
+  const invoices = await prisma.invoice.findMany({
     where: { patientId: req.patient.id },
+    include: { charges: true, claim: true, payments: true },
     orderBy: { createdAt: "desc" },
   });
-  const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
-  res.json({ payments, totalPaid, balance: 0 });
+
+  const bills = invoices.map((inv) => {
+    const s = summarizeInvoice(inv);
+    return {
+      id: inv.id, number: inv.number, status: inv.status, createdAt: inv.createdAt,
+      billed: s.billed, insurancePaid: s.insurancePaid, contractualAdj: s.contractualAdj,
+      youOwe: s.patientResponsibility, youPaid: s.patientPaid, balance: s.balance,
+      claim: inv.claim ? { status: inv.claim.status, payerName: inv.claim.payerName, denialReason: inv.claim.denialReason } : null,
+    };
+  });
+
+  // Only the patient's own money counts as "you paid" — insurer EFTs are not theirs.
+  const payments = await prisma.payment.findMany({
+    where: { patientId: req.patient.id, source: "Patient" },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.json({
+    payments,
+    bills,
+    totalPaid: round2(payments.reduce((s, p) => s + p.amount, 0)),
+    balance: round2(bills.reduce((s, b) => s + Math.max(b.balance, 0), 0)),
+  });
 });
 
 // Secure messaging with the care team

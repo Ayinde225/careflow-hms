@@ -61,6 +61,15 @@ export const api = {
   portalBilling: () => request("/portal/billing"),
   portalMessages: () => request("/portal/messages"),
   portalSendMessage: (body) => request("/portal/messages", { method: "POST", body: { body } }),
+
+  // --- Phase 5: Billing / revenue cycle (billing + admin) ---
+  billingAnalytics: () => request("/billing/analytics"),
+  billingUnbilled: () => request("/billing/unbilled"),
+  generateInvoice: (encId) => request(`/billing/encounters/${encId}/invoice`, { method: "POST" }),
+  billingInvoices: () => request("/billing/invoices"),
+  billingInvoice: (id) => request(`/billing/invoices/${id}`),
+  submitClaim: (id) => request(`/billing/invoices/${id}/claim`, { method: "POST" }),
+  postInvoicePayment: (id, body) => request(`/billing/invoices/${id}/payment`, { method: "POST", body }),
 };
 
 // Local calendar date (YYYY-MM-DD) — NOT UTC, so "today" matches the server's local-time day bounds.

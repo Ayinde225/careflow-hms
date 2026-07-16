@@ -21,6 +21,9 @@ async function main() {
   await prisma.clinicalNote.deleteMany();
   await prisma.vitals.deleteMany();
   await prisma.payment.deleteMany();
+  await prisma.claim.deleteMany();
+  await prisma.charge.deleteMany();
+  await prisma.invoice.deleteMany();
   await prisma.questionnaireResponse.deleteMany();
   await prisma.consentDocument.deleteMany();
   await prisma.encounter.deleteMany();
@@ -42,6 +45,9 @@ async function main() {
   });
   const reception = await prisma.user.create({
     data: { email: "reception@careflow.dev", passwordHash: hash("reception123"), role: "receptionist", fullName: "Rita Reception" },
+  });
+  await prisma.user.create({
+    data: { email: "billing@careflow.dev", passwordHash: hash("billing123"), role: "billing", fullName: "Bella Billing" },
   });
   const drUser = await prisma.user.create({
     data: { email: "dr.hart@careflow.dev", passwordHash: hash("doctor123"), role: "doctor", fullName: "Dr. Alicia Hart" },
@@ -135,11 +141,43 @@ async function main() {
   await prisma.payment.create({ data: { patientId: jordan.id, encounterId: pastEnc.id, amount: 30, type: "Copay", method: "Card", status: "Paid", createdAt: pastDay } });
   await prisma.message.create({ data: { patientId: jordan.id, sender: "CareTeam", body: "Hi Jordan, your recent lab results are available in your portal. Your LDL is slightly elevated — let's discuss diet at your next visit. — Dr. Hart's office" } });
 
+  // --- Billing: a fully adjudicated invoice for Jordan's past visit (populates revenue analytics) ---
+  const inv = await prisma.invoice.create({
+    data: {
+      number: `INV-${year}-0001`, patientId: jordan.id, encounterId: pastEnc.id, status: "Claimed",
+      charges: { create: [
+        { cptCode: "99213", description: "Office/outpatient visit, established patient", amount: 150 },
+        { cptCode: "80061", description: "Lipid panel", amount: 65 },
+        { cptCode: "80048", description: "Basic metabolic panel", amount: 40 },
+      ] },
+    },
+  });
+  // Billed 255, verified BCBS PPO, copay 30 → allowed 178.50, insurance pays 148.50, patient owes 30
+  await prisma.claim.create({
+    data: { invoiceId: inv.id, patientId: jordan.id, payerName: "Blue Cross Blue Shield", claimNumber: `CLM-${year}-00001`, status: "Paid", billedAmount: 255, allowedAmount: 178.5, insurancePaid: 148.5, patientResponsibility: 30 },
+  });
+  await prisma.payment.create({ data: { patientId: jordan.id, invoiceId: inv.id, amount: 148.5, type: "Bill", method: "EFT", source: "Insurance", status: "Paid" } });
+  // The $30 copay Jordan paid at check-in credits against this invoice (as the app now does
+  // at invoice generation) — otherwise he'd be billed for the same $30 twice.
+  await prisma.payment.updateMany({ where: { encounterId: pastEnc.id, invoiceId: null }, data: { invoiceId: inv.id } });
+  await prisma.invoice.update({ where: { id: inv.id }, data: { status: "Paid" } });
+
+  // --- An unbilled completed visit for Priya (for the billing workspace demo) ---
+  const pDay = new Date(); pDay.setDate(pDay.getDate() - 7); pDay.setHours(11, 0, 0, 0);
+  const pAppt = await prisma.appointment.create({
+    data: { patientId: priya.id, providerId: providers[1].id, departmentId: cardiology.id, startAt: pDay, endAt: new Date(pDay.getTime() + 30 * 60000), reason: "Chest pain evaluation", status: "Completed", createdByUserId: reception.id },
+  });
+  const pEnc = await prisma.encounter.create({ data: { appointmentId: pAppt.id, patientId: priya.id, type: "Office Visit", status: "Closed", checkInAt: pDay } });
+  await prisma.diagnosis.create({ data: { encounterId: pEnc.id, icd10Code: "R07.9", description: "Chest pain, unspecified", isPrimary: true } });
+  await prisma.order.create({ data: { encounterId: pEnc.id, type: "Imaging", name: "Electrocardiogram (ECG)", status: "Resulted", resultText: "Normal sinus rhythm.", orderedByUserId: drUser.id } });
+  await prisma.order.create({ data: { encounterId: pEnc.id, type: "Lab", name: "Lipid Panel", status: "Resulted", resultText: "Within normal limits.", orderedByUserId: drUser.id } });
+
   console.log("Done. Demo logins:");
   console.log("  admin@careflow.dev / admin123");
   console.log("  reception@careflow.dev / reception123");
   console.log("  dr.hart@careflow.dev / doctor123");
   console.log("  jordan@careflow.dev / patient123  (patient portal)");
+  console.log("  billing@careflow.dev / billing123  (revenue cycle)");
 }
 
 main()

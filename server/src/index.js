@@ -8,6 +8,7 @@ import { appointmentsRouter } from "./routes/appointments.js";
 import { paymentsRouter } from "./routes/payments.js";
 import { clinicalRouter } from "./routes/clinical.js";
 import { portalRouter } from "./routes/portal.js";
+import { billingRouter } from "./routes/billing.js";
 
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN?.split(",") || true }));
@@ -22,6 +23,7 @@ app.use("/api/appointments", appointmentsRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/clinical", clinicalRouter);
 app.use("/api/portal", portalRouter);
+app.use("/api/billing", billingRouter);
 
 // Fallback error handler
 app.use((err, _req, res, _next) => {

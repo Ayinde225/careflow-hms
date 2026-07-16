@@ -4,10 +4,14 @@ import { requireAuth, requireRole } from "../auth.js";
 import { audit } from "../audit.js";
 
 export const appointmentsRouter = Router();
-appointmentsRouter.use(requireAuth);
 
 const FRONT_DESK = ["receptionist", "nurse", "doctor", "billing"];
 const STATUSES = ["Scheduled", "CheckedIn", "Roomed", "Completed", "Cancelled", "NoShow"];
+
+// Staff-only: the schedule embeds full patient records.
+// (Patients read their own appointments via /api/portal/appointments.)
+appointmentsRouter.use(requireAuth);
+appointmentsRouter.use(requireRole(...FRONT_DESK));
 
 // List appointments (optionally for a specific day) — powers the reception board.
 appointmentsRouter.get("/", async (req, res) => {

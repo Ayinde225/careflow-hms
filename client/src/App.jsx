@@ -8,6 +8,8 @@ import Patients from "./pages/Patients.jsx";
 import Schedule from "./pages/Schedule.jsx";
 import ClinicalQueue from "./pages/ClinicalQueue.jsx";
 import Encounter from "./pages/Encounter.jsx";
+import BillingDashboard from "./pages/billing/BillingDashboard.jsx";
+import BillingWorkspace from "./pages/billing/BillingWorkspace.jsx";
 import { PortalHome, PortalHealth, PortalResults, PortalVisits, PortalMessages, PortalBilling } from "./pages/portal/PortalPages.jsx";
 
 function StaffRoutes() {
@@ -19,6 +21,8 @@ function StaffRoutes() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/clinical" element={<ClinicalQueue />} />
         <Route path="/clinical/:id" element={<Encounter />} />
+        <Route path="/billing" element={<BillingDashboard />} />
+        <Route path="/billing/work" element={<BillingWorkspace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

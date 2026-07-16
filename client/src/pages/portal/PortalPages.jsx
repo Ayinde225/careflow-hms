@@ -221,6 +221,34 @@ export function PortalBilling() {
         <div className="ptile"><div className="ptile-num">${data.totalPaid.toFixed(2)}</div><div className="ptile-label">Total paid</div></div>
       </div>
       <div className="pcard">
+        <h3>Your bills</h3>
+        {(!data.bills || data.bills.length === 0) && <p className="muted">No bills yet.</p>}
+        {data.bills?.map((b) => (
+          <div key={b.id} className="bill-row">
+            <div className="pcard-row">
+              <div>
+                <span className="mono">{b.number}</span>
+                <div className="muted small">{dt(b.createdAt)}{b.claim ? ` · ${b.claim.payerName}` : " · Self-pay"}</div>
+              </div>
+              <div>
+                <strong className={b.balance > 0 ? "warn" : "pos"}>${b.balance.toFixed(2)}</strong>
+                <span className="muted small"> due</span>
+              </div>
+            </div>
+            <div className="bill-break">
+              <span>Billed <b>${b.billed.toFixed(2)}</b></span>
+              {b.insurancePaid > 0 && <span>Insurance paid <b className="pos">${b.insurancePaid.toFixed(2)}</b></span>}
+              {b.contractualAdj > 0 && <span>Plan discount <b>−${b.contractualAdj.toFixed(2)}</b></span>}
+              <span>You paid <b>${b.youPaid.toFixed(2)}</b></span>
+            </div>
+            {b.claim?.status === "Denied" && (
+              <p className="deny">⚠ Insurance denied this claim: {b.claim.denialReason}. The balance is your responsibility — contact billing with questions.</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="pcard">
         <h3>Payment history</h3>
         {data.payments.length === 0 && <p className="muted">No payments on record.</p>}
         {data.payments.map((p) => (

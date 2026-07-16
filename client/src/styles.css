@@ -142,6 +142,48 @@ input:focus, select:focus { outline: 2px solid #99f6e4; border-color: var(--bran
 .linkbtn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: .82rem; font-weight: 600; }
 .complete-bar { display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin-top: 18px; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
 
+/* --- Phase 5: billing / revenue cycle --- */
+.tabs { display: flex; gap: 6px; }
+.tabs a { padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: .88rem; color: var(--muted); border: 1px solid var(--line); background: #fff; }
+.tabs a.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.kpi-num.pos { color: #15803d; }
+.kpi-num.neg { color: var(--danger); }
+.kpi-num.warn { color: #b45309; }
+.pos { color: #15803d; }
+.neg { color: var(--danger); }
+.warn { color: #b45309; }
+.right { text-align: right; }
+
+.bridge { display: flex; height: 30px; border-radius: 8px; overflow: hidden; background: var(--line); }
+.bridge-seg { height: 100%; }
+.seg-adj { background: #94a3b8; }
+.seg-ins { background: #0d9488; }
+.seg-pat { background: #22c55e; }
+.seg-ar { background: #f59e0b; }
+.bridge-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: .84rem; }
+.bridge-legend span { display: flex; align-items: center; gap: 5px; }
+.bridge-legend em { color: var(--muted); font-style: normal; font-size: .78rem; }
+.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.hbar-row { display: grid; grid-template-columns: 130px 1fr 90px; align-items: center; gap: 10px; margin-bottom: 10px; font-size: .86rem; }
+.hbar-label { color: #334155; font-weight: 600; }
+.hbar-track { background: #f1f5f9; border-radius: 5px; height: 16px; overflow: hidden; }
+.hbar-fill { background: var(--brand); height: 100%; border-radius: 5px; }
+.hbar-val { text-align: right; font-weight: 600; color: var(--brand-dark); }
+
+.detail-row td { background: #fafbfd; padding: 0; }
+.inv-detail { padding: 18px; }
+.inv-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+.inv-detail h4 { margin: 0 0 8px; font-size: .92rem; }
+.mini-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.mini-table td { padding: 5px 4px; border-bottom: 1px solid var(--line); }
+.mini-table tr.total td { border-top: 2px solid var(--line); border-bottom: none; padding-top: 8px; }
+.claim-panel { background: #fff; border: 1px solid var(--line); border-radius: 9px; padding: 12px; }
+.claim-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.deny { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 9px 12px; border-radius: 8px; font-size: .85rem; }
+
+@media (max-width: 900px) { .inv-cols { grid-template-columns: 1fr; } }
+
 /* --- Phase 3: patient portal --- */
 .portal { min-height: 100vh; background: #f0f6f9; }
 .portal-top { background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 24px; padding: 0 28px; height: 62px; position: sticky; top: 0; z-index: 10; }
@@ -169,6 +211,11 @@ input:focus, select:focus { outline: 2px solid #99f6e4; border-color: var(--bran
 .avs { background: #f8fafc; border-radius: 10px; padding: 14px 16px; margin-top: 12px; font-size: .92rem; }
 .avs ul { margin: 4px 0 8px 18px; }
 .avs p { margin: 6px 0; }
+.bill-row { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 10px; }
+.bill-row:last-child { border-bottom: none; margin-bottom: 0; }
+.bill-break { display: flex; flex-wrap: wrap; gap: 16px; font-size: .8rem; color: var(--muted); padding: 2px 0 4px; }
+.bill-break b { color: var(--ink); }
+
 .thread { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; max-height: 420px; overflow-y: auto; }
 .bubble { max-width: 78%; padding: 10px 14px; border-radius: 14px; font-size: .92rem; }
 .bubble.them { background: #eef2f7; align-self: flex-start; border-bottom-left-radius: 4px; }

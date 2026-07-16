@@ -48,6 +48,7 @@ model Patient {
   payments          Payment[]
   consents          ConsentDocument[]
   prescriptions     Prescription[]
+  invoices          Invoice[]
 }
 
 model InsurancePolicy {
@@ -150,6 +151,7 @@ model Encounter {
   diagnoses     Diagnosis[]
   orders        Order[]
   prescriptions Prescription[]
+  invoice       Invoice?
 }
 
 // --- Phase 2: Clinical ------------------------------------------------
@@ -244,11 +246,55 @@ model Payment {
   patient     Patient  @relation(fields: [patientId], references: [id])
   encounterId String?
   encounter   Encounter? @relation(fields: [encounterId], references: [id])
+  invoiceId   String?
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
   amount      Float
   type        String // Copay | Bill
   method      String // Card | Cash
+  source      String   @default("Patient") // Patient | Insurance
   status      String   @default("Paid")
   createdAt   DateTime @default(now())
+}
+
+// --- Phase 5: Revenue cycle -------------------------------------------
+model Invoice {
+  id          String   @id @default(cuid())
+  number      String   @unique
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  encounterId String?  @unique
+  encounter   Encounter? @relation(fields: [encounterId], references: [id])
+  status      String   @default("Open") // Open | Claimed | PartiallyPaid | Paid | Denied | Void
+  createdAt   DateTime @default(now())
+  charges     Charge[]
+  claim       Claim?
+  payments    Payment[]
+}
+
+model Charge {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  cptCode     String
+  description String
+  amount      Float
+  quantity    Int     @default(1)
+}
+
+model Claim {
+  id                    String   @id @default(cuid())
+  invoiceId             String   @unique
+  invoice               Invoice  @relation(fields: [invoiceId], references: [id])
+  patientId             String
+  payerName             String
+  claimNumber           String   @unique
+  status                String // Submitted | Paid | Denied
+  billedAmount          Float
+  allowedAmount         Float    @default(0)
+  insurancePaid         Float    @default(0)
+  patientResponsibility Float    @default(0)
+  denialReason          String?
+  submittedAt           DateTime @default(now())
 }
 
 // --- Phase 3: Patient portal messaging --------------------------------

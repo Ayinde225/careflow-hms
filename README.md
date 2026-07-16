@@ -1,6 +1,6 @@
 # CareFlow — Hospital Management System
 
-A full-stack hospital management system that digitalizes the running of a hospital, built **module by module along one patient's journey**. Three seats are complete and working end to end: **Front Desk / Reception**, **Clinician**, and the **Patient Portal** — plus the Phase 0 foundation.
+A full-stack hospital management system that digitalizes the running of a hospital, built **module by module along one patient's journey**. Four seats are complete and working end to end: **Front Desk / Reception**, **Clinician**, the **Patient Portal**, and **Billing / Revenue Cycle** — plus the Phase 0 foundation.
 
 Realism is anchored on **Conway Regional Health System**, which runs on **Epic / MyChart** — so CareFlow mirrors real workflows: **MRN**-based patient records, **eCheck-In**, appointment scheduling, a live reception queue, and **PatientWallet**-style copay collection.
 
@@ -36,7 +36,17 @@ Patients log into their own secure view — **scoped so each patient sees only t
 - 🧪 **Results** — released lab & imaging results with values
 - 📄 **Visits** — history with an expandable **After Visit Summary** (diagnoses, plan, tests, prescriptions)
 - 💬 **Secure messaging** with the care team
-- 💳 **Billing** (PatientWallet-style) — balance & payment history
+- 💳 **Billing** (PatientWallet-style) — itemized bills (billed → insurance paid → plan discount → what you owe) and payment history
+
+### Billing / Revenue Cycle (Phase 5)
+
+The finance module — a real revenue cycle, not a toy invoice list:
+- 🧾 **Charge capture** — completed visits generate **CPT-coded** charges from the services rendered (office visit + each lab/imaging order)
+- 📨 **Insurance claims** with payer **adjudication** — allowed amount, **contractual adjustment**, insurance payment, patient responsibility
+- 🚫 **Denials** with reasons (unverified coverage denies; the balance moves to patient responsibility)
+- 💰 **Payments** — desk copays credit the invoice automatically; overpayment is rejected; status derives from the money, not the claim
+- 📊 **Revenue dashboard** — gross charges, contractual adjustments, net collected, **outstanding A/R**, **denial rate**, charges by department, payer mix
+- 🧮 **Reconciliation guarantee** — `gross charges === contractual adjustments + insurance collected + patient collected + A/R`, asserted live on the dashboard
 
 ## 🧱 Tech stack
 
@@ -76,13 +86,14 @@ npm run dev            # http://localhost:5173
 | Admin | `admin@careflow.dev` | `admin123` |
 | Doctor | `dr.hart@careflow.dev` | `doctor123` |
 | Patient (portal) | `jordan@careflow.dev` | `patient123` |
+| Billing / revenue | `billing@careflow.dev` | `billing123` |
 
 ## 🗺️ Roadmap (the patient journey continues)
 
 - ✅ **Phase 2 — Clinician:** EHR notes, ICD-10 diagnoses, lab/imaging orders, e-prescribing *(done)*
 - ✅ **Phase 3 — Patient portal (MyChart-style):** results, After Visit Summary, messaging, billing *(done)*
+- ✅ **Phase 5 — Billing & insurance claims + revenue analytics** *(done)*
 - **Phase 4 — Pharmacy & inventory**
-- **Phase 5 — Billing & insurance claims + revenue analytics**
 - **Phase 6 — Admin analytics, bed & OR management, full audit**
 
 See [`docs/PHASE-0-FRONT-DESK-SPEC.md`](docs/PHASE-0-FRONT-DESK-SPEC.md) for the full blueprint.

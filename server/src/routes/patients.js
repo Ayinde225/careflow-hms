@@ -4,9 +4,13 @@ import { requireAuth, requireRole } from "../auth.js";
 import { audit } from "../audit.js";
 
 export const patientsRouter = Router();
-patientsRouter.use(requireAuth);
 
 const FRONT_DESK = ["receptionist", "nurse", "doctor", "billing"];
+
+// Staff-only: patients must never reach the roster or another patient's chart.
+// (Patients get their own self-scoped data from /api/portal.)
+patientsRouter.use(requireAuth);
+patientsRouter.use(requireRole(...FRONT_DESK));
 
 // Generate an institutional-looking MRN: CRW-YYYY-000123
 async function nextMrn() {
